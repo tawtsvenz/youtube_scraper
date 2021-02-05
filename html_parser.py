@@ -208,7 +208,7 @@ def create_songs_json(input_html_filename, output_filename):
         try:
             song = parse_song(song_details)
             songs.append(song)
-        except ValueError as e:
+        except ValueError, AttributeError as e:
             print(song_details)
             print(e)
             print()
