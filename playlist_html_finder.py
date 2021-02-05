@@ -12,6 +12,7 @@ from html_parser import create_songs_json
 #playlist_id [custom_playlist_name]
 #where playlist_id is the youtube playlist id and custom_playlist_name is any valid filename.
 #custom_playlist_name should not contain whitespace.
+#You can comment out lines with # at start of line and they will be ignored
 playlists_filename = 'playlists.txt'
 output_folder = 'output'
 
@@ -25,7 +26,7 @@ def parse_playlists():
         lines_read = f.readlines()
         for line in lines_read:
             line = line.strip()
-            if not line: continue #line empty
+            if not line or line.startswith('#'): continue #line empty or line commented out; begins with #
             line = line.split(' ')
             if len(line) == 1:
                 line.append(line[0]) #let playlist id be name of output filename
@@ -68,7 +69,11 @@ def parse_playlists():
             print(f"Using existing page for {playlist_name}")
 
         output_filename = os.path.join(output_folder, f'{playlist_name}.json')
-        create_songs_json(html_filename, output_filename)
+        if not os.path.exists(output_filename):
+            print(f'Creating json for {playlist_name}')
+            create_songs_json(html_filename, output_filename)
+        else:
+            print(f'Skipping json for {playlist_name}. It already exists!')
         time.sleep(2)
 
     driver.close()

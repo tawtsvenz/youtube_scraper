@@ -1,8 +1,15 @@
 from bs4 import BeautifulSoup as bs
 
 import json
+import random
+import os
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+
+# folders containing already used names
+files_dirs = ['../quizappstaticfiles/', '../quizappstaticfiles/audio', ]
+# json files must end with .json
+json_output_dir = 'output'
 
 
 class SongConstants:
@@ -11,6 +18,59 @@ class SongConstants:
     TITLE = 'TITLE'
     TIME = 'TIME'
     YEAR = 'YEAR'
+    RANDOM_FILENAME = 'RANDOM_FILENAME'
+
+
+_used_numbers = []
+
+
+def get_valid_random_name():
+    if not _used_numbers:
+        # populate used numbers
+        # check used in static files
+        _files = []
+        for d in files_dirs:
+            if os.path.exists(d) and os.path.isdir(d):
+                _files.extend(os.listdir(d))
+        files = []
+        for f in _files:
+            absname = os.path.basename(f)
+            dot_index = absname.rfind('.')
+            if dot_index > 0:
+                absname = absname[: dot_index].strip()
+            if (absname.isdigit()):
+                _used_numbers.append(absname)
+        # check all json in output folder for used numbers
+        if os.path.exists(json_output_dir):
+            json_files = [f for f in os.listdir(json_output_dir) if
+                          os.path.isfile(os.path.join(json_output_dir, f))
+                          and f.lower().endswith('.json')]
+            for f in json_files:
+                try:
+                    json_obj = None
+                    with open(os.path.join(json_output_dir, f)) as f:
+                        json_obj = json.loads(f.read())
+                    obj: dict
+                    for obj in json_obj:
+                        if type(obj) is dict and SongConstants.RANDOM_FILENAME in obj:
+                            _used_numbers.append(
+                                str(obj[SongConstants.RANDOM_FILENAME]))
+                except Exception as e:
+                    print(e)
+                    print()
+        print(_used_numbers)
+        print(len(_used_numbers))
+    # find unique random number
+    num: str = str(random.randint(1000, 2000000000))
+    count = 0
+    while num in _used_numbers:
+        num = str(random.randint(1000, 2000000000))
+
+        count += 1
+        if count % 1000000:
+            print(f'Number not found yet after {count} tries')
+    _used_numbers.append(num)  # add found num
+    return num
 
 
 def rfind_nth(string: str, substring: str, n):
@@ -194,6 +254,9 @@ def parse_song(song_details: str):
     song[SongConstants.FEATURES] = featured_artists
     title = get_title(title_section)
     song[SongConstants.TITLE] = title
+
+    random_name = get_valid_random_name()
+    song[SongConstants.RANDOM_FILENAME] = random_name
 
     return song
 
