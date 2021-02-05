@@ -116,47 +116,19 @@ artist_separators = (',', ' x ', ' & ', ' and ', ' + ')
 
 
 def get_official_video_index(string):
+    #use lower case words here
+    joining_words = ('official', 'video', 'audio', 'lyric')
+    standalone_words = ('official video', 'official audio', 'official music')
+    tags = [tag + space for tag in ('[', '(', '{') for space in ('', ' ')]
+
+    words = [tag + word for word in joining_words for tag in tags]
+    words.extend(standalone_words)
+
     index_official_video = -1
-    if index_official_video < 0:
-        index_official_video = string.lower().find('(official')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('( official')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('[official')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('[ official')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('(video')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('( video')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('[video')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('[ video')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('(audio')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('( audio')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('[audio')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('[ audio')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('(lyric')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('( lyric')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('[lyric')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('[ lyric')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('official video')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('official audio')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('official music')
-    if index_official_video < 0:
-        index_official_video = string.lower().find('official video')
+    for word in words:
+        index_official_video = string.lower().find(word)
+        if index_official_video >= 0:
+            break
 
     return index_official_video
 
@@ -170,12 +142,9 @@ def get_artists(yt_artist_string):
             break
     if ft_index > 0:
         string = string[:ft_index]
-    string = string.replace(artist_separators[1], ',')
-    string = string.replace(artist_separators[1].upper(), ',')
-    string = string.replace(artist_separators[2], ',')
-    string = string.replace(artist_separators[3], ',')
-    string = string.replace(artist_separators[3].upper(), ',')
-    string = string.replace(artist_separators[4], ',')
+    
+    for sep in artist_separators:
+        string = string.replace(sep, ',')
 
     return string.strip()
 
