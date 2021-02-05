@@ -171,9 +171,9 @@ def parse_song(song_details: str):
     song_details = song_details[: date_index].strip()
     by_index = song_details.rfind(' by ')
     song_details = song_details[:by_index].strip()
-    artist_section, title_section = song_details.split('-')
-    artist_section = artist_section.strip()
-    title_section = title_section.strip()
+    hyphen_index = song_details.find('-')
+    artist_section = song_details[:hyphen_index].strip()
+    title_section = song_details[:hyphen_index+1:].strip()
     artists = ''
     a = get_artists(artist_section)
     if a:
@@ -208,7 +208,7 @@ def create_songs_json(input_html_filename, output_filename):
         try:
             song = parse_song(song_details)
             songs.append(song)
-        except ValueError, AttributeError as e:
+        except (ValueError, AttributeError) as e:
             print(song_details)
             print(e)
             print()
