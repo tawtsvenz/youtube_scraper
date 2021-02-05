@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
+
 class SongConstants:
     ARTIST = 'ARTIST'
     FEATURES = 'FEATURES'
@@ -52,6 +53,7 @@ def get_year(yt_date_str: str):
 
 ft_strings = (' ft ', ' ft. ', ' feat ', ' feat.')
 artist_separators = (',', ' x ', ' & ', ' and ', ' + ')
+
 
 def get_official_video_index(string):
     index_official_video = -1
@@ -129,7 +131,7 @@ def get_featured(yt_artist_or_title_string):
     if ft_index > 0:
         string = string[ft_index + len(ft_string_used):]
     else:
-        #no features
+        # no features
         return None
     string = get_artists(string)
     index_official_video = get_official_video_index(string)
@@ -172,8 +174,10 @@ def parse_song(song_details: str):
     by_index = song_details.rfind(' by ')
     song_details = song_details[:by_index].strip()
     hyphen_index = song_details.find('-')
+    if hyphen_index < 0:
+        raise ValueError('Cant find hyphen separator!')
     artist_section = song_details[:hyphen_index].strip()
-    title_section = song_details[:hyphen_index+1:].strip()
+    title_section = song_details[hyphen_index + 1:].strip()
     artists = ''
     a = get_artists(artist_section)
     if a:
@@ -192,6 +196,7 @@ def parse_song(song_details: str):
     song[SongConstants.TITLE] = title
 
     return song
+
 
 def create_songs_json(input_html_filename, output_filename):
     innerhtml = ""
