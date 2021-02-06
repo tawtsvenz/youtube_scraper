@@ -18,6 +18,7 @@ class SongConstants:
     TITLE = 'TITLE'
     TIME = 'TIME'
     YEAR = 'YEAR'
+    YOUTUBE_ID = 'YOUTUBE_ID'
     RANDOM_FILENAME = 'RANDOM_FILENAME'
 
 
@@ -58,8 +59,6 @@ def get_valid_random_name():
                 except Exception as e:
                     print(e)
                     print()
-        print(_used_numbers)
-        print(len(_used_numbers))
     # find unique random number
     num: str = str(random.randint(1000, 2000000000))
     count = 0
@@ -244,6 +243,13 @@ def create_songs_json(input_html_filename, output_filename):
         song_details = result.get('aria-label')
         try:
             song = parse_song(song_details)
+            #get youtube_id and populate
+            href: str = result.get('href')
+            start_tag = '?v='
+            id_start_index = href.find(start_tag) + len(start_tag)
+            id_end_index = id_start_index + 11 #Youtube ID is always 11 characters long
+            youtube_id = href[id_start_index: id_end_index]
+            song[SongConstants.YOUTUBE_ID] = youtube_id
             songs.append(song)
         except (ValueError, AttributeError) as e:
             print(song_details)
