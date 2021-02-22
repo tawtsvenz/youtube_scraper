@@ -203,9 +203,11 @@ def parse_song(song_details: str):
     song_details = song_details[:by_index].strip()
     hyphen_index = song_details.find('-')
     if hyphen_index < 0:
-        raise ValueError('Cant find hyphen separator!')
-    artist_section = song_details[:hyphen_index].strip()
-    title_section = song_details[hyphen_index + 1:].strip()
+        #cant separate the sections, so just say both artist_section and title_section are equal
+        artist_section = title_section = song_details
+    else:
+        artist_section = song_details[:hyphen_index].strip()
+        title_section = song_details[hyphen_index + 1:].strip()
     artists = ''
     a = get_artists(artist_section)
     if a:
