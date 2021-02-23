@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup as bs
 import json
 import random
 import os
+import gzip
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -10,6 +11,7 @@ from dateutil.relativedelta import relativedelta
 files_dirs = ['../quizappstaticfiles/', '../quizappstaticfiles/audio', ]
 # json files must end with .json
 json_output_dir = 'output'
+compressed_json_dirs = ['../chorus_finder/output']
 
 
 class SongConstants:
@@ -22,13 +24,34 @@ class SongConstants:
     RANDOM_FILENAME = 'RANDOM_FILENAME'
 
 
-_used_numbers = []
+_used_numbers = set()
 
 
 def get_valid_random_name():
     if not _used_numbers:
         # populate used numbers
-        # check used in static files
+       
+        #check compressed json folders and populate
+        compressed_json_filenames = []
+        for folder in compressed_json_dirs:
+            if os.path.exists(folder) and os.path.isdir(folder):
+                filenames = os.listdir(folder)
+                for filename in filenames:
+                    abspath = os.path.join(folder, filename)
+                    if os.path.isfile(abspath) and abspath.endswith('.json.gz'):
+                        compressed_json_filenames.append(abspath)
+        for filename in compressed_json_filenames:
+            try:
+                objs = []
+                with gzip.open(filename) as f:
+                    objs = json.loads(f.read().decode('utf-8'))
+                for song in objs:
+                    _used_numbers.add(song[SongConstants.RANDOM_FILENAME])
+                print(f'Loaded existing names from compressed file {filename}')
+            except Exception as e:
+                print(f'Failed to process compressed file {filename}: {e.args}')
+
+         # check used in static files
         _files = []
         for d in files_dirs:
             if os.path.exists(d) and os.path.isdir(d):
@@ -40,7 +63,8 @@ def get_valid_random_name():
             if dot_index > 0:
                 absname = absname[: dot_index].strip()
             if (absname.isdigit()):
-                _used_numbers.append(absname)
+                _used_numbers.add(absname)
+
         # check all json in output folder for used numbers
         if os.path.exists(json_output_dir):
             json_files = [f for f in os.listdir(json_output_dir) if
@@ -54,7 +78,7 @@ def get_valid_random_name():
                     obj: dict
                     for obj in json_obj:
                         if type(obj) is dict and SongConstants.RANDOM_FILENAME in obj:
-                            _used_numbers.append(
+                            _used_numbers.add(
                                 str(obj[SongConstants.RANDOM_FILENAME]))
                 except Exception as e:
                     print(e)
@@ -68,7 +92,7 @@ def get_valid_random_name():
         count += 1
         if count % 1000000:
             print(f'Number not found yet after {count} tries')
-    _used_numbers.append(num)  # add found num
+    _used_numbers.add(num)  # add found num
     return num
 
 
