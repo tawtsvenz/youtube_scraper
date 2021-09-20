@@ -220,8 +220,9 @@ def parse_song(song_details: str):
 
     date_index = rfind_nth(song_details, ' ', 2)
     date_string = song_details[date_index:]
-    year = get_year(date_string)
-    song[SongConstants.YEAR] = year
+    # skip year we'll find it ourselves
+    # year = get_year(date_string)
+    song[SongConstants.YEAR] = None #year
     song_details = song_details[: date_index].strip()
     by_index = song_details.rfind(' by ')
     song_details = song_details[:by_index].strip()
