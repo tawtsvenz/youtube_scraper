@@ -30,7 +30,7 @@ def parse_playlists():
             line = line.split(' ')
             if len(line) == 1:
                 line.append(line[0]) #let playlist id be name of output filename
-            already_exists = f'{line[1]}.json' in existing_json
+            already_exists = (f'{line[1]}.json' in existing_json) or (f'{line[1]}.json.gz' in existing_json)
             if not already_exists:
                 lines.append(line)
 
@@ -68,7 +68,7 @@ def parse_playlists():
         else:
             print(f"Using existing page for {playlist_name}")
 
-        output_filename = os.path.join(output_folder, f'{playlist_name}.json')
+        output_filename = os.path.join(output_folder, f'{playlist_name}.json.gz')
         if not os.path.exists(output_filename):
             print(f'Creating json for {playlist_name}')
             create_songs_json(html_filename, output_filename)

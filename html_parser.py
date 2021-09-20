@@ -283,5 +283,5 @@ def create_songs_json(input_html_filename, output_filename):
             print(e)
             print()
 
-    with open(output_filename, 'w') as f:
-        f.write(json.dumps(songs, indent=2))
+    with gzip.open(output_filename, 'wb') as f:
+        f.write(json.dumps(songs, indent=2).encode('utf-8'))
