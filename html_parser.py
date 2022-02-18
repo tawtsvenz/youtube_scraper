@@ -22,6 +22,10 @@ class SongConstants:
     YEAR = 'YEAR'
     YOUTUBE_ID = 'YOUTUBE_ID'
     RANDOM_FILENAME = 'RANDOM_FILENAME'
+    # list of tuples of significant clips in the media. tuples have two element (start_sec, end_sec)
+    CLIPS = 'CLIPS'
+    COUNTRY = 'COUNTRY'
+    AVAILABLE = 'AVAILABLE'
 
 
 _used_numbers = set()
@@ -211,6 +215,40 @@ def get_title(yt_title_section):
     return string.strip()
 
 
+def parse_filename_as_song(filename: str):
+    song_details = os.path.basename(filename)
+    song = {}
+    song[SongConstants.YEAR] = None
+    hyphen_index = song_details.find('-')
+    if hyphen_index < 0:
+        #cant separate the sections, so just say both artist_section and title_section are equal
+        artist_section = title_section = song_details
+    else:
+        artist_section = song_details[:hyphen_index].strip()
+        title_section = song_details[hyphen_index + 1:].strip()
+    artists = ''
+    a = get_artists(artist_section)
+    if a:
+        artists += a
+    song[SongConstants.ARTIST] = artists
+    a = get_featured(artist_section)
+    featured_artists = ''
+    if a:
+        featured_artists += a
+    a = get_featured(title_section)
+    if a:
+        comma = "," if featured_artists else ""
+        featured_artists += comma + a
+    song[SongConstants.FEATURES] = featured_artists
+    title = get_title(title_section)
+    song[SongConstants.TITLE] = title
+
+    random_name = get_valid_random_name()
+    song[SongConstants.RANDOM_FILENAME] = random_name
+
+    return song
+
+
 def parse_song(song_details: str):
     song: dict = {}
     ago_index = song_details.rfind(' ago')
@@ -252,7 +290,7 @@ def parse_song(song_details: str):
 
     random_name = get_valid_random_name()
     song[SongConstants.RANDOM_FILENAME] = random_name
-
+    song[SongConstants.AVAILABLE] = False
     return song
 
 
@@ -285,3 +323,4 @@ def create_songs_json(input_html_filename, output_filename):
 
     with gzip.open(output_filename, 'wb') as f:
         f.write(json.dumps(songs, indent=2).encode('utf-8'))
+
